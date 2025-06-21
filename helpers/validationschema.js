@@ -1,6 +1,8 @@
-const joi = require('joi');
-const authschema = joi.object({
-    email: joi.string().email().lowercase().required(),
-    password: joi.string().min(6).required(),
+const Joi = require('joi');
+
+const authSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required()
 });
-module.exports = { authschema };
+
+module.exports = { authSchema };

@@ -1,7 +1,7 @@
 const { authSchema } = require('../helpers/validationschema');
 const User = require('../models/usermodel');
 const createError = require('http-errors');
-
+const { signAccessToken } = require('../helpers/jwtHelpers');
 
 module.exports = {
     // REGISTER FUNCTION
@@ -16,7 +16,10 @@ module.exports = {
             const user = new User(result);
             const savedUser = await user.save();
 
-            res.send({ savedUser });
+            // ✅ Generate Access Token
+            const accessToken = await signAccessToken(savedUser.id);
+
+            res.send({ accessToken });
         } catch (error) {
             if (error.isJoi === true) error.status = 422;
             next(error);
@@ -31,13 +34,12 @@ module.exports = {
             const user = await User.findOne({ email: result.email });
             if (!user) throw createError.NotFound('User not registered');
 
-            // Match password
+            // ✅ Match password
             const isMatch = await user.isValidPassword(result.password);
             if (!isMatch) throw createError.Unauthorized('Username/Password not valid');
 
-            // Generate token
+            // ✅ Generate Access Token
             const accessToken = await signAccessToken(user.id);
-            // const refreshToken = await signRefreshToken(user.id); // Uncomment if needed
 
             res.send({ accessToken });
         } catch (error) {
